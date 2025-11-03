@@ -1,0 +1,1 @@
+Simple data warehouse project to demonstrate relevant technical and business competencies.
