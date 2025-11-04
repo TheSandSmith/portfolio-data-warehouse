@@ -274,12 +274,22 @@ BEGIN
         PRINT '(Load Duration: ' + CAST(DATEDIFF(MILLISECOND, @start_time, @end_time) AS NVARCHAR) + ' milliseconds)';
         PRINT '';
 
-        -- Loading erp_loc_a101
+        /*
+        -------------------------------------------------------------------------------------------------
+        Table: silver.erp_loc_a101
+        -------------------------------------------------------------------------------------------------
+        Data Cleansing and Transformation Logic:
+        - Remove dashes from 'cid'
+        - Normalize country codes to trimmed, full country names
+        -------------------------------------------------------------------------------------------------
+        */
         SET @start_time = GETDATE();
+
 		PRINT '>> Truncating Table: silver.erp_loc_a101';
 		TRUNCATE TABLE silver.erp_loc_a101;
 		PRINT '>> Inserting Data Into: silver.erp_loc_a101';
-		INSERT INTO silver.erp_loc_a101 (
+		
+        INSERT INTO silver.erp_loc_a101 (
 			cid,
 			cntry
 		)
@@ -290,18 +300,29 @@ BEGIN
 				WHEN TRIM(cntry) IN ('US', 'USA') THEN 'United States'
 				WHEN TRIM(cntry) = '' OR cntry IS NULL THEN 'n/a'
 				ELSE TRIM(cntry)
-			END AS cntry -- Normalize and Handle missing or blank country codes
+			END AS cntry
 		FROM bronze.erp_loc_a101;
+
 	    SET @end_time = GETDATE();
-        PRINT '>> Load Duration: ' + CAST(DATEDIFF(MILLISECOND, @start_time, @end_time) AS NVARCHAR) + ' milliseconds';
-        PRINT '>> -------------';
+
+        PRINT '(Load Duration: ' + CAST(DATEDIFF(MILLISECOND, @start_time, @end_time) AS NVARCHAR) + ' milliseconds)';
+        PRINT '';
 		
-		-- Loading erp_px_cat_g1v2
+		/*
+        -------------------------------------------------------------------------------------------------
+        Table: silver.erp_px_cat_g1v2
+        -------------------------------------------------------------------------------------------------
+        Data Cleansing and Transformation Logic:
+        No specific transformations were required; direct copy from bronze to silver
+        -------------------------------------------------------------------------------------------------
+        */
 		SET @start_time = GETDATE();
+
 		PRINT '>> Truncating Table: silver.erp_px_cat_g1v2';
 		TRUNCATE TABLE silver.erp_px_cat_g1v2;
 		PRINT '>> Inserting Data Into: silver.erp_px_cat_g1v2';
-		INSERT INTO silver.erp_px_cat_g1v2 (
+		
+        INSERT INTO silver.erp_px_cat_g1v2 (
 			id,
 			cat,
 			subcat,
@@ -313,16 +334,18 @@ BEGIN
 			subcat,
 			maintenance
 		FROM bronze.erp_px_cat_g1v2;
-		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(MILLISECOND, @start_time, @end_time) AS NVARCHAR) + ' milliseconds';
-        PRINT '>> -------------';
+		
+        SET @end_time = GETDATE();
+
+        PRINT '(Load Duration: ' + CAST(DATEDIFF(MILLISECOND, @start_time, @end_time) AS NVARCHAR) + ' milliseconds)';
+        PRINT '';
 
 		SET @batch_end_time = GETDATE();
+
 		PRINT '=========================================='
 		PRINT 'Loading Silver Layer is Completed';
-        PRINT '   - Total Load Duration: ' + CAST(DATEDIFF(MILLISECOND, @batch_start_time, @batch_end_time) AS NVARCHAR) + ' milliseconds';
+        PRINT 'Total Load Duration: ' + CAST(DATEDIFF(MILLISECOND, @batch_start_time, @batch_end_time) AS NVARCHAR) + ' milliseconds';
 		PRINT '=========================================='
-		
 	END TRY
 	BEGIN CATCH
 		PRINT '=========================================='
